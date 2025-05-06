@@ -1,7 +1,8 @@
 m =[]
-for i in range(4):
+tamanho = int(input("Digite o tamanho da matriz: "))
+for i in range(tamanho):
     linha=[]
-    for j in range(4):
+    for j in range(tamanho):
        vlr=int(input(f"Digite o valor para a posição[{i+1}][{j+1}]: "))
        linha.append(vlr)
     m.append(linha)
