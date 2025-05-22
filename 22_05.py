@@ -1,0 +1,7 @@
+n = input("Digite palavras: ")
+print(f"Esse é o número de caracteres: {len(n)}")
+print("Essas são suas palavras: ", n.upper())
+print(f"Essas são suas palavras separadas {n.split()}")
+ns = n.split()
+print(f"Esse é o número de palavras: {len(ns)}")
+print(f"Essas são as letras todas separadas: {list(n)}")
