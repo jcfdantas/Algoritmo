@@ -1,0 +1,133 @@
+def verifica_listap(pets):
+    """Verifica se a lista de pets é válida"""
+    return bool(pets and len(pets) > 0)
+
+def verifica_petativo(pet):
+    """Verifica se o pet está ativo"""
+    return pet[0]
+
+def calcularpontospvacina(pet):
+    """Calcula pontos baseados em vacinas"""
+    pontos = 0
+    vacinas = pet[3]
+    if vacinas > 10:
+        pontos = 25
+    elif vacinas > 5:
+        pontos = 15
+    elif vacinas > 2:
+        pontos = 8
+    return pontos
+
+def verpetinconfig(pet, config):
+    """Verifica se a espécie do pet está nas configurações permitidas"""
+    return pet[1] in config[0]
+
+def atvextra(pet):
+    """Calcula pontos por atividades extras"""
+    pontos = 0
+    if len(pet) <= 5 or not pet[5]:
+        return pontos
+        
+    tipo, nota = pet[5]
+    if tipo == 'adestramento':
+        if nota > 80:
+            pontos = 20
+        elif nota > 60:
+            pontos = 10
+        else:
+            pontos = 5
+    elif tipo == 'competicao':
+        pontos = nota * 0.2
+    
+    return pontos
+
+def somarpontos(pet):
+    """Soma todos os pontos do pet"""
+    return calcularpontospvacina(pet) + atvextra(pet) + pet[2]
+
+def aplicar_bonus(pontos, bonus_tipo):
+    """Aplica bônus aos pontos"""
+    if not bonus_tipo:
+        return pontos
+        
+    if bonus_tipo == 'premiado':
+        return pontos * 1.3
+    elif bonus_tipo == 'adocao':
+        return pontos + 10
+    elif bonus_tipo == 'resgate':
+        return pontos * 1.1
+    return pontos
+
+def calcular_status_pets(pets, config, regras, bonus=None):
+    """
+    Calcula o status dos pets baseado nos parâmetros fornecidos
+    pets: lista de pets
+    config: configurações do sistema
+    regras: regras de pontuação
+    bonus: lista de bônus por pet
+    """
+    if not verifica_listap(pets):
+        return 0
+
+    total_pontos = 0
+    pets_validos = 0
+
+    for i, pet in enumerate(pets):
+        if not verifica_petativo(pet):
+            continue
+
+        if not verpetinconfig(pet, config):
+            continue
+
+        idade = pet[2]
+        if idade < config[1]:
+            continue
+
+        pontos = somarpontos(pet)
+        
+        # Aplica bônus se existir
+        if bonus and i < len(bonus):
+            pontos = aplicar_bonus(pontos, bonus[i])
+
+        # Limita pontos a 100
+        pontos = min(pontos, 100)
+
+        # Aplica regras especiais
+        if regras[0] and idade < config[1]:
+            if len(regras) > 1 and regras[1]:
+                idade_bonus = min(idade + 5, config[1])
+                pontos = max(pontos, idade_bonus)
+            elif len(regras) > 2 and regras[2] and pet[3] > 0:
+                pontos += 5
+
+        total_pontos += pontos
+        pets_validos += 1
+
+    if pets_validos == 0:
+        return 0
+
+    media = total_pontos / pets_validos
+
+    # Ajusta média final
+    if media > 90:
+        media = min(media * 1.05, 100)
+    elif media > 70:
+        media *= 1.02
+
+    return media
+
+if __name__ == "__main__":
+    pets_teste = [
+        [True, 'cachorro', 5, 8, 'Carlos', ['adestramento', 90]],
+        [True, 'gato', 3, 12, 'Ana', ['competicao', 70]],
+        [False, 'passaro', 1, 2, 'Joao', None],
+        [True, 'cachorro', 2, 0, 'Marina', ['adestramento', 65]]
+    ]
+
+    config_teste = [['cachorro', 'gato', 'passaro'], 2]
+    regras_teste = [True, True, True]
+    bonus_teste = ['premiado', 'resgate', None, 'adocao']
+
+    resultado = calcular_status_pets(
+        pets_teste, config_teste, regras_teste, bonus_teste)
+    print("Média calculada:", resultado)
